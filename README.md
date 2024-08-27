@@ -41,7 +41,7 @@ flutter pub get
 ```
 **4.Run the app:**
 ```bash
-Run the app:
+flutter run
 ```
 ## Usage
 - **Main Video Feed:** The main screen displays a vertically scrollable list of video posts. Each post occupies the full screen.
