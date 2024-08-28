@@ -25,6 +25,8 @@ class ReplyWidget extends StatefulWidget {
 
 class _ReplyWidgetState extends State<ReplyWidget> {
   bool _showReferenceInfo = true; // State to control the visibility of the reference info
+  PageController _pageController = PageController();
+  int _currentReplyIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -46,49 +48,94 @@ class _ReplyWidgetState extends State<ReplyWidget> {
           return Center(child: Text('No replies found'));
         }
 
-        return PageView.builder(
-          scrollDirection: Axis.vertical,
-          itemCount: replies.length,
-          itemBuilder: (context, index) {
-            final reply = replies[index];
-            final controller = VideoPlayerController.networkUrl(Uri.parse(reply.videoUrl));
-            
-            return FutureBuilder(
-              future: controller.initialize(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  controller.play();
-                  controller.setLooping(true);
-                  return Stack(
-                    children: [
-                      VideoPlayerWidget(
-                        controller: controller, 
-                        showProgressIndicator: true, // Enable progress indicator for replies
-                      ),
-                      if (_showReferenceInfo)
-                        Positioned(
-                          top: 20,
-                          left: 10,
-                          right: 10,
-                          child: _ReferenceInfo(
-                            title: widget.originalTitle,
-                            thumbnailUrl: widget.originalThumbnailUrl,
-                            username: widget.originalUsername,
-                            onClose: () {
-                              setState(() {
-                                _showReferenceInfo = false;
-                              });
-                            },
-                          ),
-                        ),
-                    ],
-                  );
-                } else {
-                  return Center(child: CircularProgressIndicator());
-                }
+        return Stack(
+          children: [
+            PageView.builder(
+              controller: _pageController,
+              scrollDirection: Axis.vertical,
+              itemCount: replies.length,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentReplyIndex = index;
+                });
               },
-            );
-          },
+              itemBuilder: (context, index) {
+                final reply = replies[index];
+                final controller = VideoPlayerController.networkUrl(Uri.parse(reply.videoUrl));
+                
+                return FutureBuilder(
+                  future: controller.initialize(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      controller.play();
+                      controller.setLooping(true);
+                      return Stack(
+                        children: [
+                          VideoPlayerWidget(
+                            controller: controller, 
+                            showProgressIndicator: true, // Enable progress indicator for replies
+                          ),
+                          if (_showReferenceInfo)
+                            Positioned(
+                              top: 20,
+                              left: 10,
+                              right: 10,
+                              child: _ReferenceInfo(
+                                title: widget.originalTitle,
+                                thumbnailUrl: widget.originalThumbnailUrl,
+                                username: widget.originalUsername,
+                                onClose: () {
+                                  setState(() {
+                                    _showReferenceInfo = false;
+                                  });
+                                },
+                              ),
+                            ),
+                        ],
+                      );
+                    } else {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                  },
+                );
+              },
+            ),
+            // Page indicators (only for the replies)
+            Positioned(
+              top: MediaQuery.of(context).size.height * 0.45,
+              right: 10,
+              child: Column(
+                children: [
+                  for (int i = 0; i < replies.length; i++)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2.0),
+                      child: Row(
+                        children: [
+                          if (_currentReplyIndex == i)
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration:const BoxDecoration(
+                                color: Colors.grey, // Grey circle to the left
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          const SizedBox(width: 4), // Space between grey and white circle
+                          Container(
+                            width: _currentReplyIndex == i ? 10 : 8,  // Adjust size based on current index
+                            height: _currentReplyIndex == i ? 10 : 8, // Adjust size based on current index
+                            decoration: BoxDecoration(
+                              color: _currentReplyIndex == i ? Colors.white : Colors.grey,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
         );
       },
     );
@@ -175,4 +222,9 @@ class _ReferenceInfo extends StatelessWidget {
     );
   }
 }
+
+
+
+
+
 

@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vibestream/providers/post_provider.dart';
@@ -35,7 +36,18 @@ class _MainScreenState extends State<MainScreen> {
             scrollDirection: Axis.vertical, // Vertical scroll
             itemCount: postProvider.posts.length,
             itemBuilder: (context, index) {
-              return PostWidget(post: postProvider.posts[index]);
+              final post = postProvider.posts[index];
+              final hasReplies = post.childVideoCount > 0;
+
+              return PostWidget(
+                post: post,
+                totalPosts: postProvider.posts.length,
+                currentIndex: index,
+                hasReplies: hasReplies,
+                originalTitle: post.title,
+                originalThumbnailUrl: post.thumbnailUrl,
+                originalUsername: post.username,
+              );
             },
           );
         },
@@ -43,6 +55,8 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
+
+
 
 
 

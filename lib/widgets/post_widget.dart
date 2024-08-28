@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:vibestream/domain/models/post.dart';
@@ -7,8 +6,23 @@ import 'package:vibestream/widgets/reply_widget.dart';
 
 class PostWidget extends StatefulWidget {
   final VideoPost post;
+  final int totalPosts;
+  final int currentIndex;
+  final bool hasReplies;
+  final String originalTitle;
+  final String originalThumbnailUrl;
+  final String originalUsername;
 
-  const PostWidget({required this.post, Key? key}) : super(key: key);
+  const PostWidget({
+    required this.post,
+    required this.totalPosts,
+    required this.currentIndex,
+    required this.hasReplies,
+    required this.originalTitle,
+    required this.originalThumbnailUrl,
+    required this.originalUsername,
+    Key? key,
+  }) : super(key: key);
 
   @override
   _PostWidgetState createState() => _PostWidgetState();
@@ -68,7 +82,7 @@ class _PostWidgetState extends State<PostWidget> {
                 ),
                 // Video progress bar (only on the main video screen)
                 Positioned(
-                  bottom: 50, // Adjust to position it directly above the bottom navigation bar
+                  bottom: 5, // Adjust to position it directly above the bottom navigation bar
                   left: 0,
                   right: 0,
                   child: _isControllerDisposed
@@ -77,8 +91,8 @@ class _PostWidgetState extends State<PostWidget> {
                           _controller,
                           allowScrubbing: true,
                           colors: VideoProgressColors(
-                            playedColor: Colors.amber,
-                            backgroundColor: Colors.white.withOpacity(0.5),
+                            playedColor: Colors.amber, // Golden color
+                            backgroundColor: Colors.white.withOpacity(0.5), // Light white background
                           ),
                           padding: EdgeInsets.zero,
                         ),
@@ -90,14 +104,52 @@ class _PostWidgetState extends State<PostWidget> {
                   right: 0,
                   child: _BottomAppNavigator(),
                 ),
+                // Page indicators (only on the main video screen)
+                Positioned(
+                  top: MediaQuery.of(context).size.height * 0.45,
+                  right: 10,
+                  child: Column(
+                    children: [
+                      for (int i = 0; i < widget.totalPosts; i++)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2.0),
+                          child: Row(
+                            children: [
+                              // Main indicator
+                              Container(
+                                width: widget.currentIndex == i ? 10 : 8,  // Adjust size based on current index
+                                height: widget.currentIndex == i ? 10 : 8, // Adjust size based on current index
+                                decoration: BoxDecoration(
+                                  color: widget.currentIndex == i ? Colors.white : Colors.grey,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              if (widget.hasReplies && widget.currentIndex == i)
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 4.0),
+                                  child: Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration:const BoxDecoration(
+                                      color: Colors.grey, // Same color as the other indicators
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ],
             ),
-            // Replies horizontal scroll, no progress indicator
+            // Replies horizontal scroll
             ReplyWidget(
               postId: widget.post.id.toString(),
-              originalTitle: widget.post.title,
-              originalThumbnailUrl: widget.post.thumbnailUrl,
-              originalUsername: widget.post.username, // Pass the username
+              originalTitle: widget.originalTitle,
+              originalThumbnailUrl: widget.originalThumbnailUrl,
+              originalUsername: widget.originalUsername,
             ),
           ],
         ),
@@ -110,7 +162,7 @@ class _PostWidgetState extends State<PostWidget> {
             children: [
               Text(
                 widget.post.title,
-                style:const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -118,7 +170,7 @@ class _PostWidgetState extends State<PostWidget> {
               ),
               Text(
                 widget.post.author,
-                style:const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   color: Colors.white70,
                 ),
@@ -133,19 +185,19 @@ class _PostWidgetState extends State<PostWidget> {
           child: Column(
             children: [
               IconButton(
-                icon:const Icon(Icons.favorite, color: Colors.white),
+                icon: Icon(Icons.favorite, color: Colors.white),
                 onPressed: () {},
               ),
               IconButton(
-                icon:const Icon(Icons.share, color: Colors.white),
+                icon: Icon(Icons.share, color: Colors.white),
                 onPressed: () {},
               ),
               IconButton(
-                icon:const Icon(Icons.fullscreen, color: Colors.white),
+                icon: Icon(Icons.fullscreen, color: Colors.white),
                 onPressed: () {},
               ),
               IconButton(
-                icon:const Icon(Icons.ondemand_video, color: Colors.white),
+                icon: Icon(Icons.ondemand_video, color: Colors.white),
                 onPressed: () {},
               ),
             ],
@@ -155,6 +207,7 @@ class _PostWidgetState extends State<PostWidget> {
     );
   }
 
+  // Define the BottomAppNavigator as a method or widget within this class
   Widget _BottomAppNavigator() {
     return Container(
       color: Colors.black,
@@ -163,19 +216,19 @@ class _PostWidgetState extends State<PostWidget> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           IconButton(
-            icon:const Icon(Icons.home, color: Colors.amber),
+            icon: Icon(Icons.home, color: Colors.amber),
             onPressed: () {},
           ),
           IconButton(
-            icon:const Icon(Icons.ondemand_video, color: Colors.grey),
+            icon: Icon(Icons.ondemand_video, color: Colors.grey),
             onPressed: () {},
           ),
           IconButton(
-            icon:const Icon(Icons.camera_alt, color: Colors.grey),
+            icon: Icon(Icons.camera_alt, color: Colors.grey),
             onPressed: () {},
           ),
           IconButton(
-            icon:const Icon(Icons.person, color: Colors.grey),
+            icon: Icon(Icons.person, color: Colors.grey),
             onPressed: () {},
           ),
         ],
@@ -183,30 +236,4 @@ class _PostWidgetState extends State<PostWidget> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
